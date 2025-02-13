@@ -5,74 +5,93 @@ import axiosRetry from 'axios-retry';
 const JIKAN_API_BASE_URL = "https://api.jikan.moe/v4";
 
 // --- Rate Limiting ---
-let requestQueue: (() => void)[] = [];
-let isProcessingQueue = false;
-const MAX_REQUESTS_PER_MINUTE = 60;
-const TIME_WINDOW_MS = 60000;
-let requestCount = 0;
-let resetTime = Date.now() + TIME_WINDOW_MS;
-
-const processQueue = async () => {
-  if (isProcessingQueue) return;
-  isProcessingQueue = true;
-
-  while (requestQueue.length > 0) {
-    const now = Date.now();
-    if (now > resetTime) {
-      requestCount = 0;
-      resetTime = now + TIME_WINDOW_MS;
-    }
-
-    if (requestCount < MAX_REQUESTS_PER_MINUTE) {
-      const nextRequest = requestQueue.shift();
-      if (nextRequest) {
-        requestCount++;
-        nextRequest(); // Executa a requisição
-      }
-    } else {
-      const waitTime = resetTime - now;
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
-    }
+const RATE_LIMITS = {
+  PER_SECOND:{
+    max: 3,
+    windowMs: 1000,
+  },
+  PER_MINUTE: {
+    max: 60,
+    windowMs: 60000,
   }
-  isProcessingQueue = false;
+}
+const rateLimit = {
+  secondWindow: {
+    requests: 0,
+    resetTime: Date.now() + RATE_LIMITS.PER_SECOND.windowMs,
+  },
+  minuteWindow: {
+    requests: 0,
+    resetTime: Date.now() + RATE_LIMITS.PER_MINUTE.windowMs,
+  }
+ }
+
+ // --- Cache Simples ---
+
+const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
+
+interface CacheEntry {
+  data: any;
+  expiry: number;
+  lastModified: string;
+  fingerprint?: string;
+}
+
+const cache = new Map<string, CacheEntry>();
+
+// --- Rate Limiting Logic ---
+const checkRateLimits = async (): Promise<void> => {
+  const now = Date.now();
+
+  // Reset second window if needed
+  if (now > rateLimit.secondWindow.resetTime) {
+    rateLimit.secondWindow.requests = 0;
+    rateLimit.secondWindow.resetTime = now + RATE_LIMITS.PER_SECOND.windowMs;
+  }
+
+  // Reset minute window if needed
+  if (now > rateLimit.minuteWindow.resetTime) {
+    rateLimit.minuteWindow.requests = 0;
+    rateLimit.minuteWindow.resetTime = now + RATE_LIMITS.PER_MINUTE.windowMs;
+  }
+
+  // Check if we need to wait
+  if (rateLimit.secondWindow.requests >= RATE_LIMITS.PER_SECOND.max) {
+    const waitTime = rateLimit.secondWindow.resetTime - now;
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+    return checkRateLimits();
+  }
+
+  if (rateLimit.minuteWindow.requests >= RATE_LIMITS.PER_MINUTE.max) {
+    const waitTime = rateLimit.minuteWindow.resetTime - now;
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+    return checkRateLimits();
+  }
+
+  // Increment counters
+  rateLimit.secondWindow.requests++;
+  rateLimit.minuteWindow.requests++;
 };
 
-const enqueueRequest = (requestFn: () => Promise<any>): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    requestQueue.push(async () => {
-      try {
-        const response = await requestFn();
-        resolve(response);
-      } catch (error) {
-        reject(error);
-      } finally {
-        if (!isProcessingQueue) {
-          processQueue();
-        }
-      }
-    });
-    if (!isProcessingQueue) {
-      processQueue();
-    }
-  });
-};
-
-// --- Cache Simples ---
-const cache = new Map<string, { data: any; expiry: number }>();
-const CACHE_EXPIRATION_TIME_MS = 60 * 1000; // 1 minuto
-
-const getCache = (key: string): any | null => {
+// --- Cache Functions ---
+const getCache = (key: string): CacheEntry | null => {
   const cached = cache.get(key);
   if (cached && Date.now() < cached.expiry) {
-    return cached.data;
+    return cached;
   }
   cache.delete(key);
   return null;
 };
 
-const setCache = (key: string, data: any) => {
-  const expiry = Date.now() + CACHE_EXPIRATION_TIME_MS;
-  cache.set(key, { data, expiry });
+const setCache = (key: string, data: any, headers: any): void => {
+  const expiry = Date.now() + CACHE_DURATION_MS;
+  const entry: CacheEntry = {
+    data,
+    expiry,
+    lastModified: headers['last-modified'] || new Date().toISOString(),
+    fingerprint: headers['x-request-fingerprint']
+  };
+  cache.set(key, entry);
 };
 
 // --- Axios Instance com Retry ---
@@ -95,83 +114,99 @@ const fetchData = async (url: string, useCache = true): Promise<any> => {
   if (useCache) {
     const cachedResponse = getCache(url);
     if (cachedResponse) {
-      return cachedResponse;
+      return {
+        data: cachedResponse.data,
+        cached: true,
+        lastModified: cachedResponse.lastModified,
+        fingerprint: cachedResponse.fingerprint
+      };
     }
   }
 
+  await checkRateLimits();
+
   try {
-    const response = await enqueueRequest(() => api.get(url));
+    const response = await api.get(url);
+    
     if (response.status >= 200 && response.status < 300) {
       if (useCache) {
-        setCache(url, response.data);
+        setCache(url, response.data, response.headers);
       }
-      return response.data;
+      return {
+        data: response.data,
+        cached: false,
+        lastModified: response.headers['last-modified'],
+        fingerprint: response.headers['x-request-fingerprint']
+      };
     } else {
-      throw new Error(`Erro na API: ${response.status} - ${response.statusText} para a URL: ${url}`);
+      throw new Error(`API Error: ${response.status} - ${response.statusText} for URL: ${url}`);
     }
   } catch (error: any) {
-    console.error(`Erro ao buscar ${url}:`, error);
+    if (error.response?.status === 429) {
+      // Handle rate limit exceeded
+      const retryAfter = error.response.headers['retry-after'] || 60;
+      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+      return fetchData(url, useCache);
+    }
+    console.error(`Error fetching ${url}:`, error);
     throw error;
   }
 };
 
 // --- Funções de API ---
 
-/**
- * Pesquisa animes a partir de uma query.
- */
 export const searchAnime = async (query: string, page = 1) => {
   const encodedQuery = encodeURIComponent(query);
   return fetchData(`/anime?q=${encodedQuery}&page=${page}`);
 };
 
-/**
- * Retorna os detalhes completos de um anime, dado o seu ID.
- */
 export const getAnimeDetails = async (id: number) => {
   return fetchData(`/anime/${id}/full`);
 };
 
-/**
- * Retorna os animes mais populares (top anime) paginados.
- */
+export const getAnimeCaracteres = async (id : number) => {
+  return fetchData(`/anime/${id}/characters`);
+};
+
+export const getAnimeStaff = async (id : number) => {
+  return fetchData(`/anime/${id}/staff`);
+};
+
 export const getTopAnime = async (page = 1) => {
   return fetchData(`/top/anime?page=${page}`);
 };
 
-/**
- * Retorna os animes sazonais para um ano e temporada específicos.
- */
+
 export const getSeasonalAnime = async (year: number, season: string) => {
   return fetchData(`/seasons/${year}/${season}`);
 };
 
-/**
- * Retorna um anime aleatório.
- */
+
 export const getRandomAnime = async () => {
   return fetchData(`/random/anime`);
 };
 
-/**
- * Retorna os animes relacionados a um determinado anime, filtrando entradas inválidas.
- */
 export const getRelatedAnime = async (id: number) => {
   try {
-    const data = await fetchData(`/anime/${id}/relations`, false); // opcional: não usar cache para dados possivelmente dinâmicos
-    // Filtra entradas que possuam as informações necessárias
-    const filteredData = {
-      data: (data.data || []).filter(
-        (item: any) =>
-          item &&
-          item.entry &&
-          item.entry.mal_id !== undefined &&
-          item.entry.title !== undefined
-      ),
+    const response = await fetchData(`/anime/${id}/relations`, false);
+    // Ensure we're accessing the correct data structure
+    const relations = response.data.data || [];
+    
+    // Filter and transform the data
+    const filteredData = relations.filter((item: any) =>
+      item?.entry?.length > 0 && item.entry.some((entry: any) => 
+        entry.mal_id !== undefined && entry.title !== undefined
+      )
+    ).flatMap((item: any) => item.entry);
+
+    return {
+      data: filteredData,
+      cached: response.cached,
+      lastModified: response.lastModified,
+      fingerprint: response.fingerprint
     };
-    return filteredData;
   } catch (error) {
-    console.error("Falha ao buscar animes relacionados:", error);
-    return { data: [] };
+    console.error("Failed to fetch related anime:", error);
+    return { data: [], cached: false };
   }
 };

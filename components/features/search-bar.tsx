@@ -1,12 +1,11 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import type { SearchResult } from "@/types"
-
+import { searchAnime } from "@/services/api/jikan-api"
 
 export default function SearchBar() {
   const [query, setQuery] = useState("")
@@ -14,33 +13,46 @@ export default function SearchBar() {
   const [isLoading, setIsLoading] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const router = useRouter()
+  const searchRef = useRef<HTMLDivElement>(null)
 
   const handleSearch = async (searchQuery: string) => {
     if (searchQuery.length < 3) {
       setResults([])
       return
     }
-
+  
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`)
-      const data = await response.json()
-      setResults(data.data.slice(0, 10))
+      const response = await searchAnime(searchQuery)
+      setResults(response.data.data.slice(0, 6))
     } catch (error) {
       console.error("Search failed:", error)
+      setResults([])
     } finally {
       setIsLoading(false)
     }
   }
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setQuery(value)
     handleSearch(value)
   }
 
+  const handleClickOutside = (event: MouseEvent) => {
+    if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      setShowResults(false)
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
   return (
-    <div className="relative max-w-2xl mx-auto">
+    <div className="relative max-w-2xl mx-auto" ref={searchRef}>
       <div className="relative">
         <input
           type="text"
@@ -49,6 +61,7 @@ export default function SearchBar() {
           onFocus={() => setShowResults(true)}
           placeholder="Search anime..."
           className="w-full bg-white/10 text-white placeholder-white/50 rounded-lg pl-4 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="Search anime"
         />
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
       </div>
@@ -99,4 +112,3 @@ export default function SearchBar() {
     </div>
   )
 }
-
