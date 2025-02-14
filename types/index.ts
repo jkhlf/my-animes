@@ -167,7 +167,7 @@ export interface AnimeListProps {
   onAnimeSelect: (anime: Anime) => void
 }
 
-export interface AnimeCaracteres {
+export interface AnimeCharacters {
   character: {
     mal_id: number,
     url: string,
@@ -202,7 +202,6 @@ export interface AnimeCaracteres {
 }
 
 export interface AnimeStaff {
-
   person: {
     mal_id: number,
     url: string,
@@ -223,7 +222,27 @@ export interface AnimeStaff {
   ]
 }
     
+export interface AnimeEpisodes{ 
+  mal_id: number;
+  url: string
+  title: string
+  title_japanese: string
+  title_romanji: string
+  aired: string
+  score: null
+  filler: true
+  recap: true
+  forum_url: string
+  pagination : {
+    last_visible_page: number
+    has_next_page: true
+  }
+}
+
+
 export interface RelatedAnimeEntry {
+  relation: any
+  entry: any
   mal_id: number;
   title: string;
   type?: string;
@@ -248,3 +267,24 @@ export interface SearchResult {
   }
 }
 
+export interface AnimeNews {
+  pagination: {
+    last_visible_page: number
+    has_next_page: true
+  }
+
+  mal_id: number
+  url: string
+  title: string
+  date: string
+  author_username: string
+  author_url: string
+  forum_url: string
+  images : {
+    jpg: {
+      image_url: string
+    }
+  }
+  comments: number
+  excerpt: string
+}

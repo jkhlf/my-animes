@@ -164,7 +164,7 @@ export const getAnimeDetails = async (id: number) => {
   return fetchData(`/anime/${id}/full`);
 };
 
-export const getAnimeCaracteres = async (id : number) => {
+export const getAnimeCharacters = async (id : number) => {
   return fetchData(`/anime/${id}/characters`);
 };
 
@@ -181,6 +181,17 @@ export const getSeasonalAnime = async (year: number, season: string) => {
   return fetchData(`/seasons/${year}/${season}`);
 };
 
+export const getAnimeEpisodes = async (id: number) => {
+  return fetchData(`/anime/${id}/episodes`);
+}
+
+export const getAnimeEpisodesById = async (id: number, episode: number) => {
+  return fetchData(`/anime/${id}/episodes/${episode}`);
+}
+
+export const getAnimeNews = async (id : number) => {
+  return fetchData(`/anime/${id}/news`);
+}
 
 export const getRandomAnime = async () => {
   return fetchData(`/random/anime`);
