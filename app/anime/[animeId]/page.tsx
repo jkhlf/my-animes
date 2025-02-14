@@ -1,22 +1,22 @@
-import { getAnimeDetails, getRelatedAnime, getAnimeCaracteres, getAnimeStaff } from "@/services/api/jikan-api"
+import { getAnimeDetails, getRelatedAnime, getAnimeCharacters, getAnimeStaff } from "@/services/api/jikan-api"
 import Image from "next/image"
 import Link from "next/link"
 import { Star, Calendar, Play, Info, Clock, Users, Youtube } from "lucide-react"
-import type { Anime, AnimeCaracteres, AnimeStaff, RelatedAnimeEntry } from "@/types"
+import type { Anime, AnimeCharacters, AnimeStaff, RelatedAnimeEntry } from "@/types"
 
 async function getAnimeData(id: number) {
   try {
     const [details, related, characters, staff] = await Promise.all([
       getAnimeDetails(id),
       getRelatedAnime(id),
-      getAnimeCaracteres(id),
+      getAnimeCharacters(id),
       getAnimeStaff(id)
     ]);
 
     return {
       anime: details.data.data as Anime,
       related: related.data as RelatedAnimeEntry[],
-      characters: characters.data.data as AnimeCaracteres[],
+      characters: characters.data.data as AnimeCharacters[],
       staff: staff.data.data as AnimeStaff[]
     };
   } catch (error) {
