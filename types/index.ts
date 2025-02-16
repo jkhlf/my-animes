@@ -218,11 +218,11 @@ export interface AnimeStaff {
   },
   positions:
   [
-     string
+    string
   ]
 }
-    
-export interface AnimeEpisodes{ 
+
+export interface AnimeEpisodes {
   mal_id: number;
   url: string
   title: string
@@ -233,7 +233,7 @@ export interface AnimeEpisodes{
   filler: true
   recap: true
   forum_url: string
-  pagination : {
+  pagination: {
     last_visible_page: number
     has_next_page: true
   }
@@ -280,11 +280,175 @@ export interface AnimeNews {
   author_username: string
   author_url: string
   forum_url: string
-  images : {
+  images: {
     jpg: {
       image_url: string
     }
   }
   comments: number
   excerpt: string
+}
+
+export interface Manga {
+  mal_id: number,
+  url: string,
+  images:
+  {
+    jpg:
+    {
+      image_url: string,
+      small_image_url: string,
+      large_image_url: string
+
+    },
+    webp:
+    {
+
+      image_url: string,
+      small_image_url: string,
+      large_image_url: string
+
+    }
+  },
+  approved: true,
+  titles:
+  [
+    {
+      type: string,
+      title: string
+    }
+
+  ],
+  title: string,
+  title_english: string,
+  title_japanese: string,
+  type: Manga,
+  chapters: number,
+  volumes: number,
+  status: string,
+  publishing: true,
+  published:
+  {
+    from: string,
+    to: string,
+    prop:
+
+    {
+
+      from:
+      {
+
+        day: number,
+        month: number,
+        year: number
+
+      },
+      to:
+
+      {
+        day: number,
+        month: number,
+        year: number
+      },
+      string: string
+    }
+
+  },
+  score: number,
+  scored_by: number,
+  rank: number,
+  popularity: number,
+  members: number,
+  favorites: number,
+  synopsis: string,
+  background: string,
+  authors:
+  [
+
+    {
+      mal_id: number,
+      type: string,
+      name: string,
+      url: string
+    }
+
+  ],
+  serializations:
+  [
+
+    {
+      mal_id: number,
+      type: string,
+      name: string,
+      url: string
+    }
+
+  ],
+  genres:
+  [
+
+    {
+      mal_id: number,
+      type: string,
+      name: string,
+      url: string
+    }
+
+  ],
+  explicit_genres:
+  [
+
+    {
+      mal_id: number,
+      type: string,
+      name: string,
+      url: string
+    }
+
+  ],
+  themes:
+  [
+
+    {
+      mal_id: number,
+      type: string,
+      name: string,
+      url: string
+    }
+
+  ],
+  demographics:
+  [
+
+    {
+      mal_id: number,
+      type: string,
+      name: string,
+      url: string
+    }
+  ]
+  pagination: {
+    last_visible_page: number
+    has_next_page: true
+    items: {
+      count: number
+      total: number
+      per_page: number
+    }
+  }
+}
+
+export interface MangaCardProps {
+  id: string
+  title: string
+  imageUrl: string
+  releaseDate: string
+}
+
+export interface CarouselItem {
+  id: number
+  imageUrl: string
+  title: string
+  subtitle?: string
+  date?: string
 }

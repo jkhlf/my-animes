@@ -197,6 +197,10 @@ export const getRandomAnime = async () => {
   return fetchData(`/random/anime`);
 };
 
+export const getTopManga = async (p0: number) => {
+  return fetchData(`/top/manga`);
+};
+
 export const getRelatedAnime = async (id: number) => {
   try {
     const response = await fetchData(`/anime/${id}/relations`, false);
