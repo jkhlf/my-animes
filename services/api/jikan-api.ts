@@ -201,27 +201,10 @@ export const getTopManga = async (p0: number) => {
   return fetchData(`/top/manga`);
 };
 
-export const getRelatedAnime = async (id: number) => {
-  try {
-    const response = await fetchData(`/anime/${id}/relations`, false);
-    // Ensure we're accessing the correct data structure
-    const relations = response.data.data || [];
-    
-    // Filter and transform the data
-    const filteredData = relations.filter((item: any) =>
-      item?.entry?.length > 0 && item.entry.some((entry: any) => 
-        entry.mal_id !== undefined && entry.title !== undefined
-      )
-    ).flatMap((item: any) => item.entry);
-
-    return {
-      data: filteredData,
-      cached: response.cached,
-      lastModified: response.lastModified,
-      fingerprint: response.fingerprint
-    };
-  } catch (error) {
-    console.error("Failed to fetch related anime:", error);
-    return { data: [], cached: false };
-  }
+ export const getAnimePicutres = async (id: number) => {
+  return fetchData(`/anime/${id}/pictures`);
 };
+
+export const getAnimeStreaming = async (id: number) => {
+  return fetchData(`/anime/${id}/streaming`);
+}

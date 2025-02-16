@@ -239,22 +239,6 @@ export interface AnimeEpisodes {
   }
 }
 
-
-export interface RelatedAnimeEntry {
-  relation: any
-  entry: any
-  mal_id: number;
-  title: string;
-  type?: string;
-}
-
-export interface RelatedAnimeResponse {
-  data: RelatedAnimeEntry[];
-  cached: boolean;
-  lastModified?: string;
-  fingerprint?: string;
-}
-
 export interface SearchResult {
   mal_id: number
   title: string
