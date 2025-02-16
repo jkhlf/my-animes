@@ -1,23 +1,24 @@
-import { getAnimeDetails, getRelatedAnime, getAnimeCharacters, getAnimeStaff } from "@/services/api/jikan-api"
+import { getAnimeDetails, getAnimeCharacters, getAnimeStaff } from "@/services/api/jikan-api"
 import Image from "next/image"
 import Link from "next/link"
-import { Star, Calendar, Play, Info, Clock, Users, Youtube } from "lucide-react"
-import type { Anime, AnimeCharacters, AnimeStaff, RelatedAnimeEntry } from "@/types"
+import { Heart, Share2 } from "lucide-react"
+import type { Anime, AnimeCharacters, AnimeStaff } from "@/types"
 
 async function getAnimeData(id: number) {
   try {
-    const [details, related, characters, staff] = await Promise.all([
+    const [details, characters, staff] = await Promise.all([
       getAnimeDetails(id),
-      getRelatedAnime(id),
       getAnimeCharacters(id),
-      getAnimeStaff(id)
+      getAnimeStaff(id),
+      // Caso queira buscar as imagens extras do anime:
+      // getAnimePictures(id)
     ]);
 
     return {
       anime: details.data.data as Anime,
-      related: related.data as RelatedAnimeEntry[],
       characters: characters.data.data as AnimeCharacters[],
-      staff: staff.data.data as AnimeStaff[]
+      staff: staff.data.data as AnimeStaff[],
+      // pictures: pictures.data, ...
     };
   } catch (error) {
     console.error("Error fetching anime data:", error);
@@ -25,17 +26,18 @@ async function getAnimeData(id: number) {
       anime: null,
       related: [],
       characters: [],
-      staff: []
+      staff: [],
+      // pictures: [],
     };
   }
 }
 
 export default async function AnimePage({ params }: { params: { animeId: string } }) {
-  const { anime, related, characters, staff } = await getAnimeData(Number(params.animeId));
+  const { anime, characters, staff } = await getAnimeData(Number(params.animeId));
 
   if (!anime) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[#121214] flex items-center justify-center">
         <div className="text-white text-center">
           <h1 className="text-2xl font-bold mb-4">Anime not found</h1>
           <Link href="/" className="text-blue-400 hover:text-blue-300">
@@ -46,210 +48,210 @@ export default async function AnimePage({ params }: { params: { animeId: string 
     );
   }
 
+  // Exemplo de array “falso” de galeria
+  // Em produção, você pode buscar as imagens extras via Jikan (pictures)
+  const galleryImages = [
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+    anime.images.jpg.large_image_url,
+  ];
+
+  // Monta string de gêneros para exibir tipo "Adventure / Mystery"
+  const genreString = anime.genres?.map((g) => g.name).join(" / ") || "";
+  // Se quiser adicionar os "themes" nessa string, basta concatenar:
+  // const genreString = [...anime.genres, ...anime.themes]
+  //   ?.map((item) => item.name)
+  //   .join(" / ") || "";
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
-      {/* Hero Section */}
-      <div className="relative h-[50vh] w-full">
-        <div className="absolute inset-0">
-          <Image
-            src={anime.images.jpg.large_image_url}
-            alt={anime.title}
-            fill
-            className="object-cover blur-sm opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
-        </div>
+    <div className="min-h-screen w-full bg-[#121214] text-white font-sans">
+      {/* HERO */}
+      <header className="relative w-full h-[60vh] md:h-[70vh]">
+        <Image
+          src={anime.images.jpg.large_image_url}
+          alt={anime.title}
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        {/* Gradiente para escurecer o rodapé da imagem */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#121214]" />
 
-        <div className="container mx-auto px-6 relative h-full">
-          <div className="absolute bottom-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{anime.title}</h1>
-            <div className="flex flex-wrap gap-4 text-white/80">
-              {anime.score && (
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                  <span>{anime.score} ({anime.scored_by.toLocaleString()} votes)</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                <span>{anime.year || "N/A"}</span>
-              </div>
-              {anime.episodes && (
-                <div className="flex items-center gap-2">
-                  <Play className="w-5 h-5" />
-                  <span>{anime.episodes} Episodes</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                <span>{anime.duration}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                <span>{anime.members.toLocaleString()} Members</span>
-              </div>
+        {/* Bloco de texto sobreposto no canto inferior esquerdo */}
+        <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 md:max-w-[60%]">
+          {/* Título grande */}
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 leading-tight">
+            {anime.title}
+          </h1>
+          {/* Informações resumidas: Ano | Tipo | Episódios | Temporada | País */}
+          <p className="text-gray-300 text-xs md:text-sm mb-1">
+            {anime.year} | {anime.type} | Episodes {anime.episodes ?? "?"} | Season:{" "}
+            {anime.season ?? "?"} | Country: 
+          </p>
+
+          {/* Gêneros (Adventure / Mystery) */}
+          {genreString && (
+            <div className="flex space-x-2 mb-2">
+              {anime.genres.map((genre) => (
+                <span
+                  key={genre.mal_id}
+                  className="bg-gray-700/50 text-gray-300 text-xs md:text-sm px-2 py-1 rounded"
+                >
+                  {genre.name}
+                </span>
+              ))}
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="space-y-6">
-            <div className="relative aspect-[2/3] rounded-xl overflow-hidden">
-              <Image
-                src={anime.images.jpg.large_image_url}
-                alt={anime.title}
-                fill
-                className="object-cover"
+          )}
+          <p className="text-gray-200 text-sm md:text-base line-clamp-3">
+            {anime.synopsis}
+          </p>
+        </div>
+      </header>
+
+      {/* MAIN CONTENT */}
+      <main className="container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        {/* Seção de Galeria (conforme a imagem de referência) */}
+        <section>
+          <h2 className="text-lg md:text-xl font-semibold mb-4">Gallery</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+            {galleryImages.map((src, idx) => (
+              <div
+                key={idx}
+                className="relative aspect-video rounded-md overflow-hidden"
+              >
+                <Image src={src} alt={`Gallery ${idx}`} fill className="object-cover" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Exemplos de ícones abaixo da galeria (coração, compartilhar, etc.) */}
+        <div className="flex gap-4 mt-4 md:mt-6">
+          <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
+            <Heart className="w-4 h-4 md:w-5 md:h-5" />
+            Favorite
+          </button>
+          <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
+            <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+            Share
+          </button>
+        </div>
+
+        {/* Você pode parar por aqui para ficar “igual” à imagem de ref.
+            Abaixo, mantenho seções adicionais (Characters, Staff, etc.),
+            caso queira exibir mais conteúdo, mas ainda no estilo “escuro”. */}
+
+        {/* Trailer (opcional) */}
+        {anime.trailer.youtube_id && (
+          <section className="mt-8 md:mt-10">
+            <h3 className="text-lg font-semibold mb-4">Trailer</h3>
+            <div className="relative aspect-video">
+              <iframe
+                className="w-full h-full rounded-md"
+                src={`https://www.youtube.com/embed/${anime.trailer.youtube_id}`}
+                allowFullScreen
               />
             </div>
+          </section>
+        )}
 
-            {/* Trailer Section */}
-            {anime.trailer.youtube_id && (
-              <div className="bg-white/5 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                  <Youtube className="w-5 h-5 text-red-500" />
-                  Trailer
-                </h3>
-                <div className="relative aspect-video">
-                  <iframe
-                    className="w-full h-full rounded-lg"
-                    src={`https://www.youtube.com/embed/${anime.trailer.youtube_id}`}
-                    allowFullScreen
-                  />
+        {/* Characters */}
+        {characters.length > 0 && (
+          <section className="mt-8 md:mt-10">
+            <h2 className="text-lg font-semibold mb-4">Characters</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {characters.slice(0, 8).map((char) => (
+                <div
+                  key={char.character.mal_id}
+                  className="bg-white/5 rounded-md p-2"
+                >
+                  <div className="relative aspect-square rounded-md overflow-hidden mb-2">
+                    <Image
+                      src={char.character.images.jpg.image_url}
+                      alt={char.character.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium text-sm">
+                      {char.character.name}
+                    </p>
+                    <p className="text-white/60 text-xs">{char.role}</p>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Information Box */}
-            <div className="bg-white/5 rounded-xl p-6 space-y-4">
-              <h3 className="text-xl font-semibold text-white">Information</h3>
-              <div className="space-y-2 text-white/80">
-                <div><strong>Type:</strong> {anime.type}</div>
-                <div><strong>Status:</strong> {anime.status}</div>
-                <div><strong>Aired:</strong> {anime.aired.from}</div>
-                <div><strong>Season:</strong> {anime.season} {anime.year}</div>
-                <div><strong>Broadcast:</strong> {anime.broadcast?.string}</div>
-                <div><strong>Studios:</strong> {anime.studios?.map(s => s.name).join(", ") || "N/A"}</div>
-                <div><strong>Source:</strong> {anime.source}</div>
-                <div><strong>Genres:</strong> {anime.genres?.map(g => g.name).join(", ")}</div>
-                <div><strong>Theme:</strong> {anime.themes?.map(t => t.name).join(", ")}</div>
-                <div><strong>Demographics:</strong> {anime.demographics?.map(d => d.name).join(", ")}</div>
-                <div><strong>Rating:</strong> {anime.rating}</div>
-              </div>
+              ))}
             </div>
-          </div>
+          </section>
+        )}
 
-          {/* Right Column */}
-          <div className="md:col-span-2 space-y-8">
-            {/* Synopsis */}
-            <section className="bg-white/5 rounded-xl p-6">
-              <h2 className="text-2xl font-semibold text-white mb-4">Synopsis</h2>
-              <p className="text-white/80 leading-relaxed">{anime.synopsis}</p>
-            </section>
-
-            {/* Characters */}
-            {characters.length > 0 && (
-              <section className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-2xl font-semibold text-white mb-4">Characters</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {characters.slice(0, 8).map((char) => (
-                    <div key={char.character.mal_id} className="bg-white/5 rounded-lg p-2">
-                      <div className="relative aspect-square rounded-lg overflow-hidden mb-2">
-                        <Image
-                          src={char.character.images.jpg.image_url}
-                          alt={char.character.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-white font-medium text-sm">{char.character.name}</p>
-                        <p className="text-white/60 text-xs">{char.role}</p>
-                      </div>
-                    </div>
-                  ))}
+        {/* Staff */}
+        {staff.length > 0 && (
+          <section className="mt-8 md:mt-10">
+            <h2 className="text-lg font-semibold mb-4">Staff</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {staff.slice(0, 8).map((member) => (
+                <div
+                  key={`${member.person.mal_id}-${member.positions[0]}`}
+                  className="bg-white/5 rounded-md p-2"
+                >
+                  <div className="relative aspect-square rounded-md overflow-hidden mb-2">
+                    <Image
+                      src={member.person.images.jpg.image_url}
+                      alt={member.person.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium text-sm">
+                      {member.person.name}
+                    </p>
+                    <p className="text-white/60 text-xs">
+                      {member.positions[0]}
+                    </p>
+                  </div>
                 </div>
-              </section>
-            )}
+              ))}
+            </div>
+          </section>
+        )}
 
-            {/* Staff */}
-            {staff.length > 0 && (
-              <section className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-2xl font-semibold text-white mb-4">Staff</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {staff.slice(0, 8).map((member) => (
-                    <div key={`${member.person.mal_id}-${member.positions[0]}`} className="bg-white/5 rounded-lg p-2">
-                      <div className="relative aspect-square rounded-lg overflow-hidden mb-2">
-                        <Image
-                          src={member.person.images.jpg.image_url}
-                          alt={member.person.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-white font-medium text-sm">{member.person.name}</p>
-                        <p className="text-white/60 text-xs">{member.positions[0]}</p>
-                      </div>
-                    </div>
-                  ))}
+        {/* Theme Songs */}
+        {(anime.theme?.openings?.length > 0 || anime.theme?.endings?.length > 0) && (
+          <section className="mt-8 md:mt-10">
+            <h2 className="text-lg font-semibold mb-4">Theme Songs</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {anime.theme.openings?.length > 0 && (
+                <div>
+                  <h3 className="text-base font-semibold mb-2">Openings</h3>
+                  <ul className="space-y-2 text-white/80 text-sm list-disc list-inside">
+                    {anime.theme.openings.map((opening, index) => (
+                      <li key={index}>{opening}</li>
+                    ))}
+                  </ul>
                 </div>
-              </section>
-            )}
-
-            {/* Related Anime */}
-            {related.length > 0 && (
-              <section className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-2xl font-semibold text-white mb-4">Related Anime</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {related.map((item) => (
-                    <Link
-                      key={item.mal_id}
-                      href={`/anime/${item.mal_id}`}
-                      className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                      <Info className="w-5 h-5 text-white/60" />
-                      <span className="text-white/80">{item.title}</span>
-                    </Link>
-                  ))}
+              )}
+              {anime.theme.endings?.length > 0 && (
+                <div>
+                  <h3 className="text-base font-semibold mb-2">Endings</h3>
+                  <ul className="space-y-2 text-white/80 text-sm list-disc list-inside">
+                    {anime.theme.endings.map((ending, index) => (
+                      <li key={index}>{ending}</li>
+                    ))}
+                  </ul>
                 </div>
-              </section>
-            )}
-
-            {/* Theme Songs */}
-            {(anime.theme?.openings?.length > 0 || anime.theme?.endings?.length > 0) && (
-              <section className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-2xl font-semibold text-white mb-4">Theme Songs</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {anime.theme.openings?.length > 0 && (
-                    <div>
-                      <h3 className="text-xl font-semibold text-white mb-3">Openings</h3>
-                      <ul className="space-y-2 text-white/80">
-                        {anime.theme.openings.map((opening, index) => (
-                          <li key={index} className="text-sm">{opening}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {anime.theme.endings?.length > 0 && (
-                    <div>
-                      <h3 className="text-xl font-semibold text-white mb-3">Endings</h3>
-                      <ul className="space-y-2 text-white/80">
-                        {anime.theme.endings.map((ending, index) => (
-                          <li key={index} className="text-sm">{ending}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
