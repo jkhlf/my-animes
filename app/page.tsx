@@ -37,25 +37,6 @@ export default async function Home() {
           <HeroCarousel />
         </section>
 
-        {/* New Releases Section */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">新刊</h2>
-            <div className="text-sm text-gray-500">NEW BOOKS</div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {newReleases.map((manga) => (
-              <MangaCard
-                key={manga.mal_id}
-                id={manga.mal_id.toString()}
-                title={manga.title}
-                imageUrl={manga.images.jpg.image_url}
-                releaseDate={manga.published.from}
-              />
-            ))}
-          </div>
-        </section>
-
         {/* Hero Section with Search */}
         <section className="mb-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Discover Your Next Favorite Anime</h1>
@@ -69,8 +50,11 @@ export default async function Home() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Trending Anime</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            
             {trendingAnime.map((anime) => (
+              
               <AnimeCard key={anime.mal_id} anime={anime} />
+              
             ))}
           </div>
         </section>
@@ -89,6 +73,26 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+           {/* New Releases Section */}
+           <section>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">新刊</h2>
+            <div className="text-sm text-gray-500">NEW BOOKS</div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {newReleases.map((manga) => (
+              <MangaCard
+                key={manga.mal_id}
+                id={manga.mal_id.toString()}
+                title={manga.title}
+                imageUrl={manga.images.jpg.image_url}
+                releaseDate={manga.published.from}
+              />
+            ))}
+          </div>
+        </section>
+
       </main>
     </div>
   )
