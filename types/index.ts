@@ -436,3 +436,16 @@ export interface CarouselItem {
   subtitle?: string
   date?: string
 }
+
+export interface  AnimePictures {
+  images :{
+    jpg: {
+      image_url: string
+    }
+  }
+}
+
+export interface AnimeStreaming {
+  name : string
+  url : string 
+}

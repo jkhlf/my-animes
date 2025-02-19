@@ -201,10 +201,89 @@ export const getTopManga = async (p0: number) => {
   return fetchData(`/top/manga`);
 };
 
- export const getAnimePicutres = async (id: number) => {
+ export const getAnimePictures = async (id: number) => {
   return fetchData(`/anime/${id}/pictures`);
 };
 
 export const getAnimeStreaming = async (id: number) => {
   return fetchData(`/anime/${id}/streaming`);
 }
+
+export const getAnimeRelations = async (id: number) => {
+  return fetchData(`/anime/${id}/relations`);
+};
+
+export const getAnimeRecommendations = async (id: number) => {
+  return fetchData(`/anime/${id}/recommendations`);
+};
+
+export const getAnimeStatistics = async (id: number) => {
+  return fetchData(`/anime/${id}/statistics`);
+};
+
+export const getAnimeReviews = async (id: number, page = 1) => {
+  return fetchData(`/anime/${id}/reviews?page=${page}`);
+};
+
+export const getAnimeForum = async (id: number) => {
+  return fetchData(`/anime/${id}/forum`);
+};
+
+export const getAnimeMoreInfo = async (id: number) => {
+  return fetchData(`/anime/${id}/moreinfo`);
+};
+
+// Detalhes do Mangá
+export const getMangaDetails = async (id: number) => {
+  return fetchData(`/manga/${id}/full`);
+};
+
+// Personagens do Mangá
+export const getMangaCharacters = async (id: number) => {
+  return fetchData(`/manga/${id}/characters`);
+};
+
+// Imagens do Mangá
+export const getMangaPictures = async (id: number) => {
+  return fetchData(`/manga/${id}/pictures`);
+};
+
+// Recomendações de Mangá
+export const getMangaRecommendations = async (id: number) => {
+  return fetchData(`/manga/${id}/recommendations`);
+};
+
+// Estatísticas de Mangá
+export const getMangaStatistics = async (id: number) => {
+  return fetchData(`/manga/${id}/statistics`);
+};
+
+export const getCharacterDetails = async (id: number) => {
+  return fetchData(`/characters/${id}/full`);
+};
+
+export const getPersonDetails = async (id: number) => {
+  return fetchData(`/people/${id}/full`);
+};
+
+export const getSchedule = async (day?: string) => {
+  // Se quiser buscar por dia específico, ex: /schedules/monday
+  const url = day ? `/schedules/${day}` : `/schedules`;
+  return fetchData(url);
+};
+
+export const getProducers = async (page = 1) => {
+  return fetchData(`/producers?page=${page}`);
+};
+
+export const getProducerDetails = async (producerId: number) => {
+  return fetchData(`/producers/${producerId}`);
+};
+
+export const getAnimeGenres = async () => {
+  return fetchData(`/genres/anime`);
+};
+
+export const getTopAnimeByType = async (type: string, page = 1) => {
+  return fetchData(`/top/anime?type=${type}&page=${page}`);
+};
