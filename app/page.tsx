@@ -3,7 +3,6 @@ import { getTopAnime, getSeasonalAnime, getTopManga } from "@/services/api/jikan
 import Link from "next/link"
 import type { Anime, Manga } from "@/types"
 import AnimeCard from "@/components/features/anime-card"
-import HeroCarousel from "@/components/features/hero-carousel"
 import MangaCard from "@/components/features/manga-card"
 
 async function getTrendingAnime(): Promise<Anime[]> {
@@ -30,18 +29,13 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Carousel */}
-        <section className="mb-16">
-          <HeroCarousel />
-        </section>
-
         {/* Hero Section with Search */}
         <section className="mb-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Discover Your Next Favorite Anime</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Tracking anime</h1>
           <p className="text-gray-800/70 text-lg mb-8 max-w-2xl mx-auto">
-            Track, discover, and explore thousands of anime series and movies
+            Find information about your favorite anime and manga, and discover new ones.
           </p>
           <SearchBar />
         </section>
