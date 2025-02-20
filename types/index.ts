@@ -1,42 +1,42 @@
 export interface Anime {
   mal_id: number,
-  url: string,
+  url?: string,
   images: {
-    jpg: {
+    jpg?: {
       image_url: string,
       small_image_url: string,
       large_image_url: string
     },
     webp: {
       image_url: string,
-      small_image_url: string,
-      large_image_url: string
+      small_image_url?: string,
+      large_image_url?: string
     }
   },
-  trailer: {
+  trailer?: {
     youtube_id: string,
     url: string,
     embed_url: string
   },
-  approved: true,
-  titles: [
+  approved?: true,
+  titles?: [
     {
       type: string,
       title: string
     }
   ],
   title: string,
-  title_english: string,
-  title_japanese: string,
-  title_synonyms: [
+  title_english?: string,
+  title_japanese?: string,
+  title_synonyms?: [
     string
   ],
-  type: string,
-  source: string,
-  episodes: number,
-  status: string,
-  airing: true,
-  aired: {
+  type?: string,
+  source?: string,
+  episodes?: number,
+  status?: string,
+  airing?: true,
+  aired?: {
     from: string,
     to: string,
     prop: {
@@ -53,25 +53,25 @@ export interface Anime {
       string: string
     }
   },
-  duration: string,
-  rating: string,
+  duration?: string,
+  rating?: string,
   score: number,
-  scored_by: number,
-  rank: number,
-  popularity: number,
-  members: number,
-  favorites: number,
-  synopsis: string,
-  background: string,
-  season: string,
+  scored_by?: number,
+  rank?: number,
+  popularity?: number,
+  members?: number,
+  favorites?: number,
+  synopsis?: string,
+  background?: string,
+  season?: string,
   year: number,
-  broadcast: {
+  broadcast?: {
     day: string,
     time: string,
     timezone: string,
     string: string
   },
-  producers: [
+  producers?: [
     {
       mal_id: number,
       type: string,
@@ -79,7 +79,7 @@ export interface Anime {
       url: string
     }
   ],
-  licensors: [
+  licensors?: [
     {
       mal_id: number,
       type: string,
@@ -87,7 +87,7 @@ export interface Anime {
       url: string
     }
   ],
-  studios: [
+  studios?: [
     {
       mal_id: number,
       type: string,
@@ -95,7 +95,7 @@ export interface Anime {
       url: string
     }
   ],
-  genres: [
+  genres?: [
     {
       mal_id: number,
       type: string,
@@ -103,7 +103,7 @@ export interface Anime {
       url: string
     }
   ],
-  explicit_genres: [
+  explicit_genres?: [
     {
       mal_id: number,
       type: string,
@@ -111,7 +111,7 @@ export interface Anime {
       url: string
     }
   ],
-  themes: [
+  themes?: [
     {
       mal_id: number,
       type: string,
@@ -119,7 +119,7 @@ export interface Anime {
       url: string
     }
   ],
-  demographics: [
+  demographics?: [
     {
       mal_id: number,
       type: string,
@@ -127,7 +127,7 @@ export interface Anime {
       url: string
     }
   ],
-  relations: [
+  relations?: [
     {
       relation: string,
       entry: [
@@ -140,7 +140,7 @@ export interface Anime {
       ]
     }
   ],
-  theme: {
+  theme?: {
     openings: [
       string
     ],
@@ -148,13 +148,13 @@ export interface Anime {
       string
     ]
   },
-  external: [
+  external?: [
     {
       name: string,
       url: string
     }
   ],
-  streaming: [
+  streaming?: [
     {
       name: string,
       url: string

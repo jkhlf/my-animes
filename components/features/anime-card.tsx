@@ -3,12 +3,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { Info, Star } from "lucide-react";
 import type { Anime } from "@/types";
+import { useAnimeStore, } from "@/services/store"; // Certifique-se de que o caminho para useAnimeStore está correto
 
 interface AnimeCardProps {
   anime: Anime;
 }
 
 const AnimeCard = ({ anime }: AnimeCardProps) => {
+  const { favorites, watchlist, watched, addToFavorites, removeFromFavorites, addToWatchlist, addToWatched } = useAnimeStore();
+
+  const isFavorite = favorites.some((a) => a.mal_id === anime.mal_id);
+  const isWatchlisted = watchlist.some((a) => a.mal_id === anime.mal_id);
+  const isWatched = watched.some((a) => a.mal_id === anime.mal_id);
+
   const displayedGenres = anime.genres?.slice(0, 2) || [];
   const genreCountOverflow = (anime.genres?.length || 0) - displayedGenres.length;
 
@@ -33,7 +40,7 @@ const AnimeCard = ({ anime }: AnimeCardProps) => {
     >
       <div className="relative aspect-[2/3] overflow-hidden">
         <Image
-          src={anime.images.jpg.large_image_url || "/placeholder.svg"}
+          src={anime.images?.jpg?.large_image_url || "/placeholder.svg"}
           alt={anime.title}
           fill
           className="object-cover transform group-hover:scale-110 transition-transform duration-700"
