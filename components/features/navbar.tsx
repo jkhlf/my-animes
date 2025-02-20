@@ -15,6 +15,9 @@ export default function Header() {
             <Link href="/seasonal-anime" className="text-white/80 hover:text-white transition-colors">
               Seasonal
             </Link>
+            <Link href="/tracker" className="text-white/80 hover:text-white transition-colors">
+              Your List
+            </Link>
           </div>
         </div>
       </nav>
