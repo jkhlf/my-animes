@@ -2,6 +2,7 @@ import { BookmarkCheck, Search } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent } from '@/components/ui/card'
 
 
 export const Home = () => {
@@ -48,23 +49,51 @@ export const Home = () => {
         <Tabs defaultValue='watching' className='w-full'>
           <TabsList className='w-full justify-start mb-4'>
           <TabsTrigger value='watching'>Watching</TabsTrigger>
-          <TabsTrigger value='watching'>Completed</TabsTrigger>
-          <TabsTrigger value='watching'>Plan to Watch</TabsTrigger>
-          <TabsTrigger value='watching'>On Hold</TabsTrigger>
-          <TabsTrigger value='watching'>Dropped</TabsTrigger>
+          <TabsTrigger value='completed'>Completed</TabsTrigger>
+          <TabsTrigger value='plan-to-watch'>Plan to Watch</TabsTrigger>
+          <TabsTrigger value='on-hold'>On Hold</TabsTrigger>
+          <TabsTrigger value='dropped'>Dropped</TabsTrigger>
           </TabsList>
+
+          <TabsContent value='watching'>
+              <AnimeGrid listType='watching' />
+          </TabsContent>
+
+          <TabsContent value='completed'>
+              <AnimeGrid listType='completed' />
+          </TabsContent>
+
+          <TabsContent value='plan-to-watch'>
+              <AnimeGrid listType='plan-to-watch' />
+          </TabsContent>
           
+          <TabsContent value='on-hold'>
+              <AnimeGrid listType='on-hold' />
+          </TabsContent>
+          
+          <TabsContent value='dropped'>
+              <AnimeGrid listType='dropped' />
+          </TabsContent>
+
         </Tabs>
       </TabsContent>
 
+      <TabsContent value='trending'>
+        <Card>
+          <CardContent className='pt-6'>
+              <SeasonalAnime />
+          </CardContent>
+        </Card>
+      </TabsContent>
 
-
-
-
-
+      <TabsContent value='stats'>
+        <Card>
+          <CardContent className='pt-6'>
+              <UserStats/>
+          </CardContent>
+        </Card>
+      </TabsContent>
     </Tabs>
-    
-
     </div>
   )
 }
